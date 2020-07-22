@@ -20,7 +20,7 @@ def checkBox(i,j,k):
 	j = j - j%3
 	for a in range(i,i+3):
 		for b in range(j,j+3):
-			if grid[i][j] == k:
+			if grid[a][b] == k:
 				return False
 	return True
 

@@ -44,7 +44,7 @@ def preprocesse(img,model):
 		# A square contour must have:
 		# 1) 4 corners &
 		# 2) aspect ratio ~ 1
-		if len(approx) == 4:
+		if len(approx) == 4 and np.sum(grid_digits)==0:
 			(x, y, w, h) = cv2.boundingRect(approx)
 			ar = w / float(h)
 
@@ -197,9 +197,11 @@ def preprocesse(img,model):
 						# To avoid errors while prediction, we'll use try & except
 					
 						if r_end - r_start >=20 and c_end - c_start >= 20:
-							prop = cv2.resize(prop, (28, 28))
-							prop = np.reshape(prop,(28,28,1))
+							prop = cv2.resize(prop, (64, 64))
 							prop = 255 - prop
+							kernel = np.ones((3,5),np.uint8)
+							prop = cv2.morphologyEx(prop, cv2.MORPH_OPEN, kernel)
+							prop = np.reshape(prop,(64,64,1))
 							X = np.array([prop])
 							pred = model.predict(X)
 							
@@ -211,4 +213,4 @@ def preprocesse(img,model):
 							# cv2.imwrite('dataset/image'+str(number)+'.jpg',prop)
 					
 
-	return np.array(grid_digits).reshape((9,9)),sudoku_clr,rois
+	return np.array(grid_digits).reshape((9,9)),sudoku_clr,rois,sud_coords,full_coords,width,height,cn_img

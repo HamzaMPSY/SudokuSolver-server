@@ -41,9 +41,26 @@ def solve():
 	img = cv2.imread(test +'/' +filename)
 	with graph.as_default():
 		set_session(sess)
-		grid_digits,sudoku_clr,rois = preprocesse(img,model)
+		grid_digits,sudoku_clr,rois,sud_coords,full_coords,width,height,cn_img = preprocesse(img,model)
 		print(grid_digits)
-		grid_digits = backtracingSolver(grid_digits)
+		grid_digits1 = grid_digits.copy()
+		solution = backtracingSolver(grid_digits)
+	grid_digits  = grid_digits1.reshape((81,))
+	solution  = solution.reshape((81,))
+	for e in range(81):
+		if grid_digits[e]!=0:
+			continue
+		sudoku_clr=cv2.putText(sudoku_clr, str(solution[e]), ((rois[e][2]+rois[e][3])//2, rois[e][1]),cv2.FONT_HERSHEY_SIMPLEX, 3, (0,0,255), thickness=2)
+	# Now define the homography map and apply warp perspective
+	# to fit the top-down sudoku back on our frame.
+	h, mask = cv2.findHomography(sud_coords, full_coords)
+	im_out = cv2.warpPerspective(sudoku_clr, h, (width, height))
+
+	final_im = im_out + cn_img
+	final_im = cv2.resize(final_im,(720,720))
+	cv2.imshow('solution',final_im)
+	cv2.waitKey(0)
+	return "OK lol!"
 		
 
 @app.before_first_request
